@@ -13,7 +13,14 @@
     <h2 id="teamlabel"></h2>
     <button id="buzz">Buzz!</button>
     <p id="hint">Waiting…</p>
+
+    <h3>⚡ Fastest Buzzers (this question)</h3>
+    <ol id="buzz-leaderboard"></ol>
+
+    <h3>🏆 Top Scores (round)</h3>
+    <ol id="score-leaderboard"></ol>
   </div>
+
 
   <script type="module">
     import { wsURL } from "/static/app.js";
@@ -51,11 +58,33 @@
       const already = (state.buzz_order || []).includes(teamName);
       document.getElementById('buzz').disabled = !(state.open_for_buzz) || already || !!state.answered_correctly;
 
-      // Show score
+      // --- Show player's own score
       if (state.teams[teamName]) {
         document.getElementById('hint').innerText = `Your score: ${state.teams[teamName].score}`;
       }
 
+      // --- Fastest buzzers leaderboard (first 3 in queue)
+      const buzzLb = document.getElementById('buzz-leaderboard');
+      buzzLb.innerHTML = '';
+      state.buzz_order.slice(0, 3).forEach((name, idx) => {
+        const li = document.createElement('li');
+        li.innerText = `${idx + 1}. ${name}`;
+        buzzLb.appendChild(li);
+      });
+
+      // --- Top scores leaderboard (top 3 teams by score)
+      const scoreLb = document.getElementById('score-leaderboard');
+      scoreLb.innerHTML = '';
+      const sorted = Object.values(state.teams)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      sorted.forEach((team, idx) => {
+        const li = document.createElement('li');
+        li.innerText = `${idx + 1}. ${team.name} (${team.score})`;
+        scoreLb.appendChild(li);
+      });
+
+      // --- Extra context
       if (state.answered_correctly) {
         document.getElementById('hint').innerText += ` | ✅ ${state.answered_correctly} got it right!`;
       }
