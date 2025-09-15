@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Player – {{ session_id }}</title>
+</head>
+<body>
+  <h1>Join Session {{ session_id }}</h1>
+  <input id="name" placeholder="Team name" />
+  <button id="join">Join</button>
+
+  <div id="game" style="display:none;">
+    <h2 id="teamlabel"></h2>
+    <button id="buzz">Buzz!</button>
+    <p id="hint">Waiting…</p>
+  </div>
+
+  <script type="module">
+    import { wsURL } from "/static/app.js";
+    const sessionId = "{{ session_id }}";
+    let teamName = null;
+    let ws = null;
+
+    document.getElementById('join').onclick = () => {
+      teamName = document.getElementById('name').value.trim();
+      if (!teamName) return alert("Enter team name");
+      document.getElementById('game').style.display = '';
+      document.getElementById('teamlabel').innerText = "Team: " + teamName;
+      ws = new WebSocket(wsURL(`/ws/${sessionId}/player?name=${encodeURIComponent(teamName)}`));
+      ws.onmessage = (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === "session_state") render(msg.data);
+      };
+    };
+
+    document.getElementById('buzz').onclick = () => {
+      ws.send(JSON.stringify({ type: "buzz" }));
+    };
+
+    function render(state) {
+      const already = (state.buzz_order || []).includes(teamName);
+      document.getElementById('buzz').disabled = !(state.open_for_buzz) || already || !!state.answered_correctly;
+      if (state.answered_correctly) {
+        document.getElementById('hint').innerText = `✅ ${state.answered_correctly} got it right!`;
+      } else if (!state.open_for_buzz) {
+        document.getElementById('hint').innerText = "Waiting for host…";
+      } else if (already) {
+        const idx = state.buzz_order.indexOf(teamName);
+        const turn = state.turn_index;
+        document.getElementById('hint').innerText = idx === turn ? "🎤 Your turn!" : `In queue. Position ${idx+1}`;
+      } else {
+        document.getElementById('hint').innerText = "Buzzers open!";
+      }
+    }
+  </script>
+</body>
+</html>

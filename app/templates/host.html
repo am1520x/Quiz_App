@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Host – {{ session_id }}</title>
+</head>
+<body>
+  <h1>Host Console – {{ session_id }}</h1>
+  <button id="open">Open Buzzers</button>
+  <button id="close">Close Buzzers</button>
+  <button id="next">Next Question</button>
+  <button id="reset">Reset Round</button>
+  <button id="mark-correct">Mark Correct</button>
+  <button id="mark-wrong">Mark Wrong</button>
+  <h2>Teams</h2>
+  <div id="teams"></div>
+  <h2>Queue</h2>
+  <ol id="queue"></ol>
+  <p>Current: <span id="current">—</span></p>
+  <p>Winner: <span id="winner">—</span></p>
+
+  <script type="module">
+    import { wsURL } from "/static/app.js";
+    const sessionId = "{{ session_id }}";
+    const ws = new WebSocket(wsURL(`/ws/${sessionId}/host`));
+
+    ws.onmessage = (ev) => {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === "session_state") render(msg.data);
+    };
+
+    function send(type) { ws.send(JSON.stringify({ type })); }
+    document.getElementById('open').onclick = () => send("open_buzz");
+    document.getElementById('close').onclick = () => send("close_buzz");
+    document.getElementById('next').onclick = () => send("next_question");
+    document.getElementById('reset').onclick = () => send("reset_round");
+    document.getElementById('mark-correct').onclick = () => send("mark_correct");
+    document.getElementById('mark-wrong').onclick = () => send("mark_wrong");
+
+    function render(state) {
+      document.getElementById('teams').innerText = Object.keys(state.teams).join(", ");
+      const q = document.getElementById('queue');
+      q.innerHTML = "";
+      state.buzz_order.forEach((n, idx) => {
+        const li = document.createElement("li");
+        li.innerText = (idx === state.turn_index ? "▶ " : "") + n;
+        q.appendChild(li);
+      });
+      document.getElementById('current').innerText = state.buzz_order[state.turn_index] || "—";
+      document.getElementById('winner').innerText = state.answered_correctly || "—";
+    }
+  </script>
+</body>
+</html>
