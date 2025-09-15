@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class Team(BaseModel):
     name: str
+    score: int = 0 # Default score is 0 at start
 
 
 class SessionState(BaseModel):

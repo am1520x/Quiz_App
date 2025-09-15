@@ -103,7 +103,10 @@ async def handle_host_action(sess: RuntimeSession, msg: dict):
         st.open_for_buzz = False
     elif t == "mark_correct":
         if st.buzz_order and st.turn_index < len(st.buzz_order):
-            st.answered_correctly = st.buzz_order[st.turn_index]
+            winner = st.buzz_order[st.turn_index]
+            st.answered_correctly = winner
+            # award 1 point to the winner
+            st.teams[winner].score += 1
         st.open_for_buzz = False
     elif t == "mark_wrong":
         if st.turn_index + 1 < len(st.buzz_order):
@@ -123,3 +126,7 @@ async def handle_host_action(sess: RuntimeSession, msg: dict):
         st.buzz_order = []
         st.turn_index = 0
         st.answered_correctly = None
+
+    elif t == "reset_scores":
+        for team in st.teams.values():
+            team.score = 0
