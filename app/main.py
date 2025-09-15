@@ -1,9 +1,13 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from .routers import router
 
-app = FastAPI()
+app = FastAPI(title="Pub Quiz Buzzer")
 
-@app.get("/", response_class=HTMLResponse)
-async def index():
-    return "<h1>Pub Quiz Buzzer</h1><p>It works!</p>"
-# --- IGNORE ---
+# Static files (JS/CSS) + templates
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.state.templates = Jinja2Templates(directory="app/templates")
+
+# Routes + WebSockets
+app.include_router(router)
