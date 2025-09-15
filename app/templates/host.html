@@ -15,10 +15,15 @@
   <h2>Teams</h2>
   <div id="teams"></div>
   <button id="reset-scores">Reset Scores</button>
+  <h2>Question</h2>
+  <p id="status">Question ? of ?</p>
   <h2>Buzz Queue</h2>
   <ol id="queue"></ol>
   <p>Current: <span id="current">—</span></p>
-
+  <div id="final-leaderboard" style="display:none; margin-top:20px;">
+    <h2>🎉 Final Scores</h2>
+    <ul id="final-scores"></ul>
+  </div>
   <script type="module">
     import { wsURL } from "/static/app.js";
     const sessionId = "{{ session_id }}";
@@ -66,13 +71,21 @@
       document.getElementById('current').innerText =
         state.buzz_order[state.turn_index] || "—";
 
-      // Final leaderboard after last question
+      // Final leaderboard
+      const finalBox = document.getElementById('final-leaderboard');
+      const finalList = document.getElementById('final-scores');
       if (state.question_idx + 1 === state.total_questions && !state.open_for_buzz) {
-        const final = [...Object.values(state.teams)]
+        finalBox.style.display = '';
+        finalList.innerHTML = '';
+        Object.values(state.teams)
           .sort((a, b) => b.score - a.score)
-          .map(t => `${t.name}: ${t.score}`)
-          .join("\n");
-        alert("🎉 Round Over! Final Scores:\n" + final);
+          .forEach(team => {
+            const li = document.createElement('li');
+            li.innerText = `${team.name}: ${team.score}`;
+            finalList.appendChild(li);
+          });
+      } else {
+        finalBox.style.display = 'none';
       }
     }
   </script>

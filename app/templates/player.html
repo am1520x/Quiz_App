@@ -21,6 +21,10 @@
     <h3>🏆 Top Scores (round)</h3>
     <ol id="score-leaderboard"></ol>
   </div>
+    <div id="final-leaderboard" style="display:none; margin-top:20px;">
+    <h2>🎉 Final Scores</h2>
+    <ul id="final-scores"></ul>
+  </div>
 
 
   <script type="module">
@@ -89,13 +93,37 @@
       if (state.answered_correctly) {
         document.getElementById('hint').innerText += ` | ✅ ${state.answered_correctly} got it right!`;
       }
-      // Final leaderboard after last question
+      // Question counter
+      document.getElementById('question-counter').innerText =
+        `Question ${state.question_idx + 1} of ${state.total_questions}`;
+
+      // Leaderboards: remove extra numbers
+      state.buzz_order.slice(0, 3).forEach(name => {
+        const li = document.createElement('li');
+        li.innerText = name;
+        buzzLb.appendChild(li);
+      });
+      sorted.forEach(team => {
+        const li = document.createElement('li');
+        li.innerText = `${team.name} (${team.score})`;
+        scoreLb.appendChild(li);
+      });
+
+      // Final leaderboard
+      const finalBox = document.getElementById('final-leaderboard');
+      const finalList = document.getElementById('final-scores');
       if (state.question_idx + 1 === state.total_questions && !state.open_for_buzz) {
-        const all = [...Object.values(state.teams)]
+        finalBox.style.display = '';
+        finalList.innerHTML = '';
+        Object.values(state.teams)
           .sort((a, b) => b.score - a.score)
-          .map((t, i) => `${i + 1}. ${t.name} (${t.score})`)
-          .join("\n");
-        alert("🎉 Round Over! Final Scores:\n" + all);
+          .forEach(team => {
+            const li = document.createElement('li');
+            li.innerText = `${team.name}: ${team.score}`;
+            finalList.appendChild(li);
+          });
+      } else {
+        finalBox.style.display = 'none';
       }
     }
   </script>
