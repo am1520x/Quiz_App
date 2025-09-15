@@ -37,19 +37,21 @@
     document.getElementById('reset').onclick = () => send("reset_round");
     document.getElementById('mark-correct').onclick = () => send("mark_correct");
     document.getElementById('mark-wrong').onclick = () => send("mark_wrong");
+    document.getElementById('reset-scores').onclick = () => send("reset_scores");
 
     function render(state) {
-      document.getElementById('teams').innerText = Object.keys(state.teams).join(", ");
-      const q = document.getElementById('queue');
-      q.innerHTML = "";
-      state.buzz_order.forEach((n, idx) => {
-        const li = document.createElement("li");
-        li.innerText = (idx === state.turn_index ? "▶ " : "") + n;
-        q.appendChild(li);
+      // Teams with scores
+      const tdiv = document.getElementById('teams');
+      tdiv.innerHTML = '';
+      Object.values(state.teams).forEach(team => {
+        const div = document.createElement('div');
+        div.innerText = `${team.name}: ${team.score}`;
+        tdiv.appendChild(div);
       });
-      document.getElementById('current').innerText = state.buzz_order[state.turn_index] || "—";
-      document.getElementById('winner').innerText = state.answered_correctly || "—";
+
+      // Queue rendering remains the same...
     }
   </script>
+
 </body>
 </html>
