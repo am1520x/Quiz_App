@@ -23,7 +23,7 @@
   </div>
     <div id="final-leaderboard" style="display:none; margin-top:20px;">
     <h2>🎉 Final Scores</h2>
-    <ul id="final-scores"></ul>
+    <ol id="final-scores"></ol>
   </div>
 
 
@@ -71,9 +71,9 @@
       // --- Fastest buzzers leaderboard (first 3 in queue)
       const buzzLb = document.getElementById('buzz-leaderboard');
       buzzLb.innerHTML = '';
-      state.buzz_order.slice(0, 3).forEach((name, idx) => {
+      state.buzz_order.slice(0, 3).forEach(name => {
         const li = document.createElement('li');
-        li.innerText = `${idx + 1}. ${name}`;
+        li.innerText = name;
         buzzLb.appendChild(li);
       });
 
@@ -85,7 +85,7 @@
         .slice(0, 3);
       sorted.forEach((team, idx) => {
         const li = document.createElement('li');
-        li.innerText = `${idx + 1}. ${team.name} (${team.score})`;
+        li.innerText = `${team.name} (${team.score})`;
         scoreLb.appendChild(li);
       });
 
@@ -96,18 +96,6 @@
       // Question counter
       document.getElementById('question-counter').innerText =
         `Question ${state.question_idx + 1} of ${state.total_questions}`;
-
-      // Leaderboards: remove extra numbers
-      state.buzz_order.slice(0, 3).forEach(name => {
-        const li = document.createElement('li');
-        li.innerText = name;
-        buzzLb.appendChild(li);
-      });
-      sorted.forEach(team => {
-        const li = document.createElement('li');
-        li.innerText = `${team.name} (${team.score})`;
-        scoreLb.appendChild(li);
-      });
 
       // Final leaderboard
       const finalBox = document.getElementById('final-leaderboard');
