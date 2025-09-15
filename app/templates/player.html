@@ -66,7 +66,28 @@
       // --- Show player's own score
       if (state.teams[teamName]) {
         document.getElementById('hint').innerText = `Your score: ${state.teams[teamName].score}`;
-      }     
+      }
+
+      // --- Fastest buzzers leaderboard (first 3 in queue)
+      const buzzLb = document.getElementById('buzz-leaderboard');
+      buzzLb.innerHTML = '';
+      state.buzz_order.slice(0, 3).forEach(name => {
+        const li = document.createElement('li');
+        li.innerText = name;
+        buzzLb.appendChild(li);
+      });
+
+      // --- Top scores leaderboard (top 3 teams by score)
+      const scoreLb = document.getElementById('score-leaderboard');
+      scoreLb.innerHTML = '';
+      const sorted = Object.values(state.teams)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      sorted.forEach((team, idx) => {
+        const li = document.createElement('li');
+        li.innerText = `${team.name} (${team.score})`;
+        scoreLb.appendChild(li);
+      });
 
       // --- Extra context
       if (state.answered_correctly) {
@@ -75,18 +96,6 @@
       // Question counter
       document.getElementById('question-counter').innerText =
         `Question ${state.question_idx + 1} of ${state.total_questions}`;
-
-      // Leaderboards: remove extra numbers
-      state.buzz_order.slice(0, 3).forEach(name => {
-        const li = document.createElement('li');
-        li.innerText = name;
-        buzzLb.appendChild(li);
-      });
-      sorted.forEach(team => {
-        const li = document.createElement('li');
-        li.innerText = `${team.name} (${team.score})`;
-        scoreLb.appendChild(li);
-      });
 
       // Final leaderboard
       const finalBox = document.getElementById('final-leaderboard');
