@@ -15,10 +15,9 @@
   <h2>Teams</h2>
   <div id="teams"></div>
   <button id="reset-scores">Reset Scores</button>
-  <h2>Queue</h2>
+  <h2>Buzz Queue</h2>
   <ol id="queue"></ol>
   <p>Current: <span id="current">—</span></p>
-  <p>Winner: <span id="winner">—</span></p>
 
   <script type="module">
     import { wsURL } from "/static/app.js";
@@ -49,7 +48,32 @@
         tdiv.appendChild(div);
       });
 
-      // Queue rendering remains the same...
+      // Question counter
+      document.getElementById('status').innerText = 
+        `Question ${state.question_idx + 1} of ${state.total_questions} | ` +
+        (state.open_for_buzz ? "Buzzers OPEN" : "Buzzers CLOSED");
+
+      // Queue
+      const q = document.getElementById('queue');
+      q.innerHTML = '';
+      state.buzz_order.forEach((n, idx) => {
+        const li = document.createElement("li");
+        li.innerText = (idx === state.turn_index ? "▶ " : "") + n;
+        q.appendChild(li);
+      });
+
+      // Current team
+      document.getElementById('current').innerText =
+        state.buzz_order[state.turn_index] || "—";
+
+      // Final leaderboard after last question
+      if (state.question_idx + 1 === state.total_questions && !state.open_for_buzz) {
+        const final = [...Object.values(state.teams)]
+          .sort((a, b) => b.score - a.score)
+          .map(t => `${t.name}: ${t.score}`)
+          .join("\n");
+        alert("🎉 Round Over! Final Scores:\n" + final);
+      }
     }
   </script>
 
