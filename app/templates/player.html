@@ -23,7 +23,7 @@
   </div>
     <div id="final-leaderboard" style="display:none; margin-top:20px;">
     <h2>🎉 Final Scores</h2>
-    <ul id="final-scores"></ul>
+    <ol id="final-scores"></ol>
   </div>
 
 
@@ -66,28 +66,7 @@
       // --- Show player's own score
       if (state.teams[teamName]) {
         document.getElementById('hint').innerText = `Your score: ${state.teams[teamName].score}`;
-      }
-
-      // --- Fastest buzzers leaderboard (first 3 in queue)
-      const buzzLb = document.getElementById('buzz-leaderboard');
-      buzzLb.innerHTML = '';
-      state.buzz_order.slice(0, 3).forEach((name, idx) => {
-        const li = document.createElement('li');
-        li.innerText = `${idx + 1}. ${name}`;
-        buzzLb.appendChild(li);
-      });
-
-      // --- Top scores leaderboard (top 3 teams by score)
-      const scoreLb = document.getElementById('score-leaderboard');
-      scoreLb.innerHTML = '';
-      const sorted = Object.values(state.teams)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 3);
-      sorted.forEach((team, idx) => {
-        const li = document.createElement('li');
-        li.innerText = `${idx + 1}. ${team.name} (${team.score})`;
-        scoreLb.appendChild(li);
-      });
+      }     
 
       // --- Extra context
       if (state.answered_correctly) {
