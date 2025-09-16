@@ -77,7 +77,6 @@
 
 
     function render(state) {
-      document.getElementById('buzz').disabled = !(state.open_for_buzz) || already || !!state.answered_correctly;
       // Change button color based on state
       const buzzBtn = document.getElementById('buzz');
       const already = (state.buzz_order || []).includes(teamName);
@@ -97,7 +96,7 @@
         buzzBtn.classList.remove("bg-green-600", "bg-gray-600");
       }
 
-
+      document.getElementById('buzz').disabled = !(state.open_for_buzz) || already || !!state.answered_correctly;
       // --- Show player's own score
       if (state.teams[teamName]) {
         document.getElementById('hint').innerText = `Your score: ${state.teams[teamName].score}`;

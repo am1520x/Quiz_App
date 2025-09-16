@@ -68,11 +68,21 @@ async def ws_player(ws: WebSocket, session_id: str):
             await ws.close()
             return
         if name in sess.state.teams:
-            await ws.send_text(json.dumps({"type": "error", "message": "Team name already taken"}))
-            await ws.close()
-            return
-        sess.state.teams[name] = Team(name=name)
-        sess.player_conns.add(ws)
+            # Check if this name already has an active connection
+            active_names = {t for conn in sess.player_conns for t in sess.state.teams if t == name}
+            if active_names:
+                # Another client already using this team name → reject
+                await ws.send_text(json.dumps({"type": "error", "message": "Team name already taken"}))
+                await ws.close()
+                return
+            else:
+                # Same name exists in teams, but no active connection → allow reconnection
+                sess.player_conns.add(ws)
+        else:
+            # Brand new team
+            sess.state.teams[name] = Team(name=name)
+            sess.player_conns.add(ws)
+
 
     await broadcast(sess)
 
