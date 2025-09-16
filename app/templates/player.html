@@ -3,28 +3,43 @@
 <head>
   <meta charset="utf-8" />
   <title>Player – {{ session_id }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
   <h1>Join Session {{ session_id }}</h1>
   <input id="name" placeholder="Team name" />
   <button id="join">Join</button>
 
+  <div class="flex justify-center py-4">
+    <img src="/static/Logo.png" alt="Institute Bar Logo" class="h-16">
+  </div>
+
   <div id="game" style="display:none;">
     <h2 id="teamlabel"></h2>
     <p id="question-counter"></p>
-    <button id="buzz">Buzz!</button>
+    <button id="buzz"
+      class="w-full h-64 text-5xl font-bold rounded-2xl transition-colors duration-300"
+      disabled>
+      BUZZ!
+    </button>
+
     <p id="hint">Waiting…</p>
 
-    <h3>⚡ Fastest Buzzers (this question)</h3>
-    <ol id="buzz-leaderboard"></ol>
+    <div class="h-40 overflow-y-auto bg-black text-white p-2 rounded">
+      <h3 class="text-orange-500 font-bold">⚡ Fastest Buzzers</h3>
+      <ol id="buzz-leaderboard"></ol>
 
-    <h3>🏆 Top Scores (round)</h3>
-    <ol id="score-leaderboard"></ol>
+      <h3 class="text-orange-500 font-bold mt-4">🏆 Top Scores</h3>
+      <ol id="score-leaderboard"></ol>
+    </div>
+
   </div>
-    <div id="final-leaderboard" style="display:none; margin-top:20px;">
+  <div id="final-leaderboard" style="display:none; margin-top:20px;">
     <h2>🎉 Final Scores</h2>
     <ol id="final-scores"></ol>
   </div>
+  <audio id="buzz-sound" src="/static/buzz.mp3" preload="auto"></audio>
+
 
 
   <script type="module">
@@ -57,11 +72,31 @@
 
     document.getElementById('buzz').onclick = () => {
       ws.send(JSON.stringify({ type: "buzz" }));
+      document.getElementById('buzz-sound').play();  // play sound on buzz
     };
 
+
     function render(state) {
-      const already = (state.buzz_order || []).includes(teamName);
       document.getElementById('buzz').disabled = !(state.open_for_buzz) || already || !!state.answered_correctly;
+      // Change button color based on state
+      const buzzBtn = document.getElementById('buzz');
+      const already = (state.buzz_order || []).includes(teamName);
+      const open = state.open_for_buzz && !already && !state.answered_correctly;
+
+      buzzBtn.disabled = !open;
+
+      // Colour states
+      if (open) {
+        buzzBtn.classList.add("bg-green-600", "text-white");
+        buzzBtn.classList.remove("bg-red-600", "bg-gray-600");
+      } else if (already || state.answered_correctly) {
+        buzzBtn.classList.add("bg-gray-600", "text-white");
+        buzzBtn.classList.remove("bg-green-600", "bg-red-600");
+      } else {
+        buzzBtn.classList.add("bg-red-600", "text-white");
+        buzzBtn.classList.remove("bg-green-600", "bg-gray-600");
+      }
+
 
       // --- Show player's own score
       if (state.teams[teamName]) {
